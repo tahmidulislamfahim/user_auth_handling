@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:user_auth_handling/data/api_provider.dart';
-import 'package:user_auth_handling/widgets/customer_details.dart';
+import 'package:user_auth_handling/widgets/customer_details_view.dart';
 
 class CustomerTile extends StatelessWidget {
   final dynamic item;

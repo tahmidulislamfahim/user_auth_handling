@@ -1,6 +1,6 @@
-import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:user_auth_handling/widgets/detail_row.dart';
 
 class CustomerDetails extends StatelessWidget {
   final dynamic item;
@@ -117,35 +117,74 @@ class CustomerDetails extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Raw Data Section
-            const Text(
-              "Raw API Data",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
-            Container(
-              constraints: const BoxConstraints(maxHeight: 300),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.black12),
-              ),
-              child: SingleChildScrollView(
-                child: SelectableText(
-                  (item is Map || item is List)
-                      ? const JsonEncoder.withIndent('  ').convert(item)
-                      : item.toString(),
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-                ),
-              ),
+            DetailRow(label: 'ID', value: _pick(item, ['Id'])),
+            const SizedBox(height: 8),
+            DetailRow(label: 'Email', value: _pick(item, ['Email'])),
+            const SizedBox(height: 8),
+            DetailRow(label: 'Phone', value: _pick(item, ['Phone'])),
+            const SizedBox(height: 8),
+            DetailRow(
+              label: 'Primary Address',
+              value: _pick(item, ['PrimaryAddress']),
             ),
-
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            DetailRow(
+              label: 'Secondary Address',
+              value: _pick(item, ['SecoundaryAddress']),
+            ),
+            const SizedBox(height: 8),
+            DetailRow(
+              label: 'Balance',
+              value: _formatCurrency(_pick(item, ['Balance'])),
+            ),
+            const SizedBox(height: 8),
+            DetailRow(
+              label: 'TotalDue',
+              value: _formatCurrency(_pick(item, ['TotalDue'])),
+            ),
+            const SizedBox(height: 8),
+            DetailRow(
+              label: 'Last Transaction',
+              value: _pick(item, ['LastTransactionDate']),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
+  }
+
+  String _pick(dynamic item, List<String> keys) {
+    if (item is Map) {
+      for (final k in keys) {
+        if (item.containsKey(k) && item[k] != null) {
+          final s = item[k].toString();
+          if (s.trim().isNotEmpty) return s;
+        }
+      }
+    }
+    return '';
+  }
+
+  String _formatCurrency(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return '0.00';
+    num? n;
+    try {
+      n = num.parse(raw.toString());
+    } catch (_) {
+      return raw;
+    }
+    final fixed = n.toStringAsFixed(2);
+    final parts = fixed.split('.');
+    final intPart = parts[0];
+    final dec = parts.length > 1 ? parts[1] : '00';
+    final regex = RegExp(r"(\d+)(\d{3})");
+    var s = intPart;
+    while (regex.hasMatch(s)) {
+      s = s.replaceAllMapped(regex, (m) => '${m[1]},${m[2]}');
+    }
+    return '$s.$dec';
   }
 }
